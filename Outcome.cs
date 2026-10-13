@@ -9,6 +9,7 @@ public enum Outcomes
     PlayerBust,   // Spelaren över 21
     DealerBust    // Dealern över 21
 }
+
 class Outcome
 {
     

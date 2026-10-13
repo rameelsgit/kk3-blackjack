@@ -11,4 +11,18 @@ public class Card
         Suit = suit;
         Rank = rank;
     }
-}
+
+    // Ger oss Kortets Blackjack-poäng 
+        public int GetValue()
+        {
+        if (Rank == Ranks.Jack ||Rank == Ranks.Queen || Rank == Ranks.King) return 10;
+        if (Rank == Ranks.Ace) return 11;
+    
+    return (int)Rank;   
+        }
+    // Skapar textrepresentation av kortet, t.ex. "Ace of Spades"
+    public override string ToString()
+    {
+        return $"{Rank} of {Suit}";
+    }
+ } 

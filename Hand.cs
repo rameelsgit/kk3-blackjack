@@ -31,4 +31,17 @@ class Hand
         }
         return score; // skriver ut spelarens totala poäng
     }
+
+    // IsBust metoden blir true om handen är över 21, då förlorar man 
+    public bool IsBust()
+    {
+        return CalculateScore()> 21;
+    }
+
+    // blackjack metoden används om spelaren har en naturlig 21 på två kort
+    public bool Blackjack()
+    {
+        return Cards.Count == 2 && CalculateScore() == 21; 
+
+    }
 }

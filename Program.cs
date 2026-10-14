@@ -1,5 +1,5 @@
 ﻿
-// Testar om allt som har gjort hittils funkar.
+// //Testar om allt som har gjort hittils funkar.
 
 // using Blackjack.enums;
 // using Blackjack.models;
@@ -10,9 +10,14 @@
 // Participant player = new Participant("Talha");
 // player.ReceiveCard(deck.DrawCard());
 // player.ReceiveCard(deck.DrawCard());
+// Dealer dealer= new();
+// dealer.ReceiveCard(deck.DrawCard());
+// dealer.ReceiveCard(deck.DrawCard());
 
 
 // Console.WriteLine(player.Hand.CalculateScore());
+// Console.WriteLine(dealer.Hand.CalculateScore());
+
 
 // if (player.Hand.IsBust())
 // {
@@ -21,6 +26,10 @@
 // if (player.Hand.Blackjack())
 // {
 //     Console.WriteLine("BlackJack!!!!");
+// }
+// if (dealer.NotHit())
+// {
+//     Console.WriteLine("works");
 // }
     
 

@@ -15,4 +15,21 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
         RoundDealer = dealer;
     }
 
+// när rundan startar får varje spelare två kort
+    public void DealCards()
+    {
+        // foreach loopen ser till att varje spelare får sina två kort
+        foreach( Player player in RoundPlayers)
+        {
+            player.ReceiveCard(RoundDeck.DrawCard());
+            player.ReceiveCard(RoundDeck.DrawCard());
+        }
+
+        //efter att spelarna fått sina kort får dealer 
+        RoundDealer.ReceiveCard(RoundDeck.DrawCard());
+        RoundDealer.ReceiveCard(RoundDeck.DrawCard());
+
+    }
+
+
 }

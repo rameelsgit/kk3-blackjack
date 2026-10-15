@@ -63,4 +63,40 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
         }
     }
 
+    public Outcomes EvaluateOutcome(Player player) // ger resultatet genom att jämföra poäng
+{
+    int playerScore = player.Hand.CalculateScore();
+    int dealerScore = RoundDealer.Hand.CalculateScore();
+ 
+  
+    if (playerScore > 21)
+    {
+        player.AddLoss();
+        return Outcomes.PlayerBust;
+    }
+ 
+    
+    if (dealerScore > 21)
+    {
+        player.AddWin();
+        return Outcomes.DealerBust;
+    }
+ 
+    
+    if (playerScore > dealerScore)
+    {
+        player.AddWin();
+        return Outcomes.PlayerWins;
+    }
+    if (dealerScore > playerScore)
+    {
+        player.AddLoss();
+        return Outcomes.DealerWins;
+    }
+ 
+    
+    player.AddPush();
+    return Outcomes.Push;
+}
+
 }

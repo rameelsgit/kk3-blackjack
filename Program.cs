@@ -7,7 +7,7 @@ using Blackjack.models;
 Deck deck= new Deck();
 
 
-Participant player = new Participant("Talha");
+Player player = new Player("Talha");
 player.ReceiveCard(deck.DrawCard());
 player.ReceiveCard(deck.DrawCard());
 Dealer dealer= new();

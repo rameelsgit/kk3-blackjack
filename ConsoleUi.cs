@@ -6,13 +6,27 @@ GameStorage storage = new GameStorage();
 List<Player> players = storage.LoadPlayers();
 
 Console.WriteLine("= WELCOME TO BLACKJACK =");
-Console.Write("Enter your name: ");
-string playerName = Console.ReadLine()!;
 
-if (string.IsNullOrEmpty(playerName))
+// Fråga hur många som ska spela (1 till 5 spelare).
+int playerCount = 0;
+while (playerCount < 1 || playerCount > 5)
 {
-    playerName = "Player";
+    Console.Write("How many players? (1-5): ");
+    int.TryParse(Console.ReadLine(), out playerCount);
 }
+
+List<Player> activePlayers = new List<Player>();
+
+// Registrera namn för alla valda spelare.
+for (int i = 1; i <= playerCount; i++)
+{
+    Console.Write($"Enter name for Player {i}: ");
+    string playerName = Console.ReadLine()!;
+
+    if (string.IsNullOrEmpty(playerName))
+    {
+        playerName = $"Player{i}";
+    }
 
 //Kontrollera om spelaren redan finns i listan.
 Player activePlayer = null;
@@ -28,17 +42,20 @@ foreach (Player p in players)
 }
 
 // Skapa ny spelare om den inte hittades.
+// Skapa ny spelare om den inte hittades.
 if (activePlayer == null)
 {
     activePlayer = new Player(playerName);
     players.Add(activePlayer);
 }
 
-Console.WriteLine($"Welcome {activePlayer.Name}!");
-Console.WriteLine($"Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push}");
+activePlayers.Add(activePlayer);
+
+Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push}");
+}
 
 // Starta spelmotorn.
-Game game = new Game(activePlayer.Name);
+Game game = new Game(activePlayers);
 bool keepPlaying = true;
 
 while (keepPlaying)
@@ -50,30 +67,35 @@ while (keepPlaying)
 
     // Visa startpoäng.
     Console.WriteLine($"Dealer Score: {game.CurrentDealer.Hand.CalculateScore()}");
-    Console.WriteLine($"{activePlayer.Name} Score: {activePlayer.Hand.CalculateScore()}");
+    foreach (Player p in game.CurrentPlayers)
+    {
+    Console.WriteLine($"{p.Name} Score: {p.Hand.CalculateScore()}");
+    }
 
     // Loop för spelarens tur.
+foreach (Player activePlaye in game.CurrentPlayers)
+{
+    Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
     bool isTurnActive = true;
 
     while (isTurnActive)
     {
-        // Om spelaren redan blir Bust.
-        if (activePlayer.Hand.IsBust())
+        if (activePlaye.Hand.IsBust())
         {
-            Console.WriteLine("Bust! Score went over 21.");
+            Console.WriteLine($"{activePlaye.Name} is Bust! Score went over 21.");
             isTurnActive = false;
             break;
         }
 
-        Console.Write("\nChoose: (1) Hit  (2) Stand: ");
+        Console.Write($"{activePlaye.Name}, choose: (1) Hit  (2) Stand: ");
         string input = Console.ReadLine()!;
 
         if (input == "1" || input == "hit")
         {
-            currentRound.PlayerTurn(Moves.Hit, activePlayer);
-            Console.WriteLine($"New Score: {activePlayer.Hand.CalculateScore()}");
+            currentRound.PlayerTurn(Moves.Hit, activePlaye);
+            Console.WriteLine($"New Score: {activePlaye.Hand.CalculateScore()}");
 
-            if (activePlayer.Hand.IsBust())
+            if (activePlaye.Hand.IsBust())
             {
                 Console.WriteLine("Bust! Score went over 21.");
                 isTurnActive = false;
@@ -81,8 +103,7 @@ while (keepPlaying)
         }
         else if (input == "2" || input == "stand")
         {
-            currentRound.PlayerTurn(Moves.Stand, activePlayer);
-            // Spelaren stannar, turen avslutas.
+            currentRound.PlayerTurn(Moves.Stand, activePlaye);
             isTurnActive = false; 
         }
         else
@@ -90,19 +111,39 @@ while (keepPlaying)
             Console.WriteLine("Invalid input! Please enter 1 or 2.");
         }
     }
+}
 
-    // Dealerns tur körs endast om spelaren inte blev Bust.
-    if (!activePlayer.Hand.IsBust())
+// Dealerns tur körs endast om spelaren inte blev Bust.
+  bool anyPlayerSurvives = false;
+
+    foreach (Player p in game.CurrentPlayers)
     {
-        Console.WriteLine("\nDealer turn...");
-        currentRound.DealerTurn();
-        Console.WriteLine($"Dealer Final Score: {game.CurrentDealer.Hand.CalculateScore()}");
+        if (!p.Hand.IsBust())
+        {
+        anyPlayerSurvives = true;
+        break; // Found one surviving player, stop checking
+        }
+    }
+
+    // Dealersturn körs bara om någon är i kvar i spelet.
+    if (anyPlayerSurvives)
+    {
+    Console.WriteLine("\nDealer turn...");
+    currentRound.DealerTurn();
+    Console.WriteLine($"Dealer Final Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    }
+    else
+    {
+    Console.WriteLine("\nAll players busted! Dealer wins automatically.");
     }
 
     // Skriver ut resultatet av rundan.
-    Outcomes result = currentRound.EvaluateOutcome(activePlayer);
-    Console.WriteLine($"\nRound Result: {result}");
-    Console.WriteLine($"Updated Stats -> Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push}");
+    Console.WriteLine("\n--- ROUND RESULTS ---");
+    foreach (Player activePlaye in game.CurrentPlayers)
+    {
+    Outcomes result = currentRound.EvaluateOutcome(activePlaye);
+    Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push}");
+    }
 
     // Fråga om spelaren vill spela igen.
     Console.Write("\nDo you want to play again? (yes/no): ");
@@ -116,4 +157,4 @@ while (keepPlaying)
 
 // Spara alla spelare till filen vid avslut.
 storage.SavePlayers(players);
-Console.WriteLine("\nGame finished! Your stats have been saved.");
+Console.WriteLine("Resultat sparat.");

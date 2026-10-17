@@ -4,27 +4,28 @@ class Game
 {
     // Privata fält som håller reda på det pågående spelets tillstånd
     private Deck _deck;
-    private Player _player;
+    private List<Player> _players;
     private Dealer _dealer;
 
     // Konstruktor skapar kortleken, blandar den och sätter upp spelaren och dealern
-    public Game(string playerName)
+    public Game(List<Player> players)
     {
         _deck = new Deck();
         _deck.Shuffle();
-
-        _player = new Player(playerName);
+        _players = players;
         _dealer = new Dealer();
     }
 
-    // Egenskaper som låter Program.cs användargränssnittet komma åt spelaren och dealern
-    public Player CurrentPlayer => _player;
+    public List<Player> CurrentPlayers => _players;
     public Dealer CurrentDealer => _dealer;
 
     // Tömmer både spelarens och dealerns hand innan en ny runda startar
     public void ResetHands()
     {
-        _player.Hand.ClearHand();
+        foreach (Player player in _players)
+        {
+            player.Hand.ClearHand();
+        }
         _dealer.Hand.ClearHand();
     }
 
@@ -42,8 +43,7 @@ class Game
         }
 
         // Skapar en ny runda med de aktiva objekten
-        List<Player> players = new List<Player> { _player };
-        Round currentRound = new Round(_deck, players, _dealer);
+        Round currentRound = new Round(_deck, _players, _dealer);
 
         // Dela ut de två första korten till varje deltagare
         currentRound.DealCards();

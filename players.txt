@@ -1,1 +1,4 @@
 Talha,2,1,0
+malik,1,1,0
+rameel,0,2,0
+ramiz,1,1,0

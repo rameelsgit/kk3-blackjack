@@ -1,7 +1,7 @@
 using Blackjack.enums;
 namespace Blackjack.models;
 
-class Hand
+public class Hand
 {
     List<Card> Cards { get; } = new List<Card>(); // Ger lista av kort till spelarens hand
 

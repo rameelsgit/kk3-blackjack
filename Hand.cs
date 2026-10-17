@@ -22,7 +22,15 @@ public class Hand
         int aceCount = 0;
         foreach (Card card in Cards) 
         {
-            score += card.GetValue();
+        int cardValue = card.GetValue();
+        score += cardValue;
+
+        // Om kortet är ett ess, öka antalet ess
+        
+        if (cardValue == 11) 
+        {
+            aceCount++;
+        }
         }
         while (score > 21 && aceCount > 0) // om din score blir mer än 21 ändrar ACE till 1. 
         {

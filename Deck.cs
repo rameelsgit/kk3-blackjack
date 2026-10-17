@@ -62,5 +62,12 @@ public class Deck
         Card card= _cards[0];
         _cards.RemoveAt(0);
         return card;
+ 
+    }
+
+    public int CardsRemaining()
+    {
+        return _cards. Count;
     }
 }
+

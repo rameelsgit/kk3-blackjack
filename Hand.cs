@@ -24,7 +24,7 @@ public class Hand
         {
             score += card.GetValue();
         }
-        while (score > 21 && aceCount > 0) //om mer än 21 poäng, skriver ut "Bust" och tar bort 10 poäng
+        while (score > 21 && aceCount > 0) // om din score blir mer än 21 ändrar ACE till 1. 
         {
             score -= 10;
             aceCount--;

@@ -10,7 +10,3 @@ public enum Outcomes
     DealerBust    // Dealern över 21
 }
 
-class Outcome
-{
-    
-}

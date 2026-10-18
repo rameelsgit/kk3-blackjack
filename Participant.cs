@@ -1,6 +1,6 @@
 namespace Blackjack.models;
 
-class Participant
+public class Participant
 {
     public string Name {get;}
     public Hand Hand {get;}

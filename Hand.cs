@@ -1,7 +1,7 @@
 using Blackjack.enums;
 namespace Blackjack.models;
 
-class Hand
+public class Hand
 {
     List<Card> Cards { get; } = new List<Card>(); // Ger lista av kort till spelarens hand
 
@@ -22,9 +22,17 @@ class Hand
         int aceCount = 0;
         foreach (Card card in Cards) 
         {
-            score += card.GetValue();
+        int cardValue = card.GetValue();
+        score += cardValue;
+
+        // Om kortet är ett ess, öka antalet ess
+        
+        if (cardValue == 11) 
+        {
+            aceCount++;
         }
-        while (score > 21 && aceCount > 0) //om mer än 21 poäng, skriver ut "Bust" och tar bort 10 poäng
+        }
+        while (score > 21 && aceCount > 0) // om din score blir mer än 21 ändrar ACE till 1. 
         {
             score -= 10;
             aceCount--;

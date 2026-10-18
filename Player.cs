@@ -1,6 +1,6 @@
 namespace Blackjack.models;
 
-class Player : Participant // Ärver från klassen Participant
+public class Player : Participant // Ärver från klassen Participant
 {
     public int Win { get; private set; } //antal vinster för spelaren
     public int Loss { get; private set; } // spelarens förluster
@@ -26,7 +26,12 @@ class Player : Participant // Ärver från klassen Participant
     {
          Push++;
     }
-    
-   
+    // metod som hämtar stats från storage
+    public void SetStats(int win, int loss, int push)
+    {
+        Win = win;
+        Loss = loss;
+        Push = push;
+    }
 
 }

@@ -3,7 +3,7 @@ namespace Blackjack.models;
 
 public class Hand
 {
-    List<Card> Cards { get; } = new List<Card>(); // Ger lista av kort till spelarens hand
+    public List<Card> Cards { get; } = new List<Card>(); // Ger lista av kort till spelarens hand
 
 
     public void AddCard(Card card) //  Lägger till kort till spelarens hand

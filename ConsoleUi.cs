@@ -42,7 +42,6 @@ foreach (Player p in players)
 }
 
 // Skapa ny spelare om den inte hittades.
-// Skapa ny spelare om den inte hittades.
 if (activePlayer == null)
 {
     activePlayer = new Player(playerName);
@@ -66,15 +65,15 @@ while (keepPlaying)
     Round currentRound = game.StartNewRound();
 
     // Visa startpoäng.
-    Console.WriteLine($"Dealer Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    Console.WriteLine($"\nDealer Cards: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
     foreach (Player p in game.CurrentPlayers)
     {
-    Console.WriteLine($"{p.Name} Score: {p.Hand.CalculateScore()}");
+    Console.WriteLine($"{p.Name} Cards: {string.Join(", ", p.Hand.Cards)} (Score: {p.Hand.CalculateScore()})");
     }
 
     // Loop för spelarens tur.
-foreach (Player activePlaye in game.CurrentPlayers)
-{
+    foreach (Player activePlaye in game.CurrentPlayers)
+    {
     Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
     bool isTurnActive = true;
 
@@ -93,7 +92,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
         if (input == "1" || input == "hit")
         {
             currentRound.PlayerTurn(Moves.Hit, activePlaye);
-            Console.WriteLine($"New Score: {activePlaye.Hand.CalculateScore()}");
+            Console.WriteLine($"Cards: {string.Join(", ", activePlaye.Hand.Cards)} (Score: {activePlaye.Hand.CalculateScore()})");
 
             if (activePlaye.Hand.IsBust())
             {
@@ -111,7 +110,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
             Console.WriteLine("Invalid input! Please enter 1 or 2.");
         }
     }
-}
+    }
 
 // Dealerns tur körs endast om spelaren inte blev Bust.
   bool anyPlayerSurvives = false;
@@ -130,7 +129,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
     {
     Console.WriteLine("\nDealer turn...");
     currentRound.DealerTurn();
-    Console.WriteLine($"Dealer Final Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    Console.WriteLine($"Dealer Final Score: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
     }
     else
     {

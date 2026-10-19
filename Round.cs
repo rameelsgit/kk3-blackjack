@@ -9,12 +9,24 @@ class Round
     private Dealer RoundDealer;
 
     private Outcomes RoundOutcome;
+
+    //dictionary håller koll på varje player objekts satsning separat 
+    private Dictionary<Player, int> PlayerBets= new Dictionary<Player, int>(); 
 public Round(Deck deck, List<Player> players, Dealer dealer)
 //skapade en Konstruktör som hämtar information som sparas inför rundans början.
     {
         RoundDeck = deck;
         RoundPlayers = players;
         RoundDealer = dealer;
+    }
+
+    //metoden placerar ut satsningarna fören korten delas ut
+    public void PlaceBets(Player player, int betAmounts)
+    {
+        //tar bort marker från spelarens betAmounts
+        player.RemoveChips(betAmounts);
+        // lägger spelarens betAmounts i dictionary, för att komma ihåg allas amounts
+        PlayerBets[player]= betAmounts;
     }
 
 // när rundan startar får varje spelare två kort

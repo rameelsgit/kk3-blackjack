@@ -1,0 +1,4 @@
+DealerStandsOnSoft17=true
+DeckCount=1
+Reshuffle=15
+NaturalBlack=true

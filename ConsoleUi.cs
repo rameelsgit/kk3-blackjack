@@ -4,6 +4,7 @@ using Blackjack.models;
 //Ladda alla spelare från filen.
 GameStorage storage = new GameStorage();
 List<Player> players = storage.LoadPlayers();
+RuleSet rules= RuleSet.LoadFromFile("rules.txt");
 
 Console.WriteLine("= WELCOME TO BLACKJACK =");
 
@@ -42,7 +43,6 @@ foreach (Player p in players)
 }
 
 // Skapa ny spelare om den inte hittades.
-// Skapa ny spelare om den inte hittades.
 if (activePlayer == null)
 {
     activePlayer = new Player(playerName);
@@ -55,7 +55,8 @@ Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Loss
 }
 
 // Starta spelmotorn.
-Game game = new Game(activePlayers);
+// Här för objektet game tillgång till rules också. 
+Game game = new Game(activePlayers, rules);
 bool keepPlaying = true;
 
 while (keepPlaying)

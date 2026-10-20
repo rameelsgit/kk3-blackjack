@@ -10,8 +10,17 @@ public class Deck
     // Slumpgeneratorn som hjälper oss att blanda korten.
     private static readonly Random _random=new();
 
-    public Deck()
+    // Default värde för int deckCount.
+    private int _deckCount=1;
+
+    // Antal deck
+    public Deck(int deckCount)
     {
+        // körs bara om deck count är 1 eller större annars det kommer vara default.
+        if (deckCount>0)
+        {
+            _deckCount=deckCount;
+        }
         // Skapar och blandar ordning på alla kort direkt från start.
         Reset();
     }
@@ -21,13 +30,17 @@ public class Deck
     {
         _cards.Clear();
 
-        // Skapa alla 52 kort.
+        // Körs till antal deckcount (om 2 deck= 104 kort)
+        for(int i=0; i<_deckCount; i++)
+        {
+        // Skapa alla 52 kort i en deck.
         foreach(Suit suit in Enum.GetValues<Suit>())
         {
             foreach(Ranks rank in Enum.GetValues<Ranks>())
             {
                 _cards.Add(new Card(suit,rank));
             }
+        }
         }
         Shuffle();
     }

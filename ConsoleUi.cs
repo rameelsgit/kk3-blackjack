@@ -51,7 +51,7 @@ if (activePlayer == null)
 
 activePlayers.Add(activePlayer);
 
-Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push}");
+Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push} | Chips: {activePlayer.Chips}");
 }
 
 // Starta spelmotorn.
@@ -64,6 +64,27 @@ while (keepPlaying)
     Console.WriteLine("Starting a new round...");
 
     Round currentRound = game.StartNewRound();
+
+    // placera insats fören kort delas ut 
+    Console.WriteLine("=PLACE YOUR BETS=");
+    // loopen för varje spelare att sätta in giltig amount av chips
+    foreach( Player p in game.CurrentPlayers)
+    {
+        int bet = 0;
+    // om bet inte är större än 0 eller under chips amount, körs loopen om 
+        while (bet < 1 || bet > p.Chips)
+        {
+            Console.Write($"{p.Name} (Chips: {p.Chips}) - Enter your bet: ");
+            // om input inte är ett nummer + samma krav som while-loop, körs loopen om 
+            if(!int.TryParse(Console.ReadLine(), out bet) || bet <1 || bet> p.Chips)
+            {
+                Console.WriteLine("Enter available amount");
+            }
+            
+        }
+        //om bets är giltiga plceras dem och går vidare
+        currentRound.PlaceBets(p, bet);
+    }
 
     // Visa startpoäng.
     Console.WriteLine($"Dealer Score: {game.CurrentDealer.Hand.CalculateScore()}");
@@ -142,7 +163,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
     foreach (Player activePlaye in game.CurrentPlayers)
     {
     Outcomes result = currentRound.EvaluateOutcome(activePlaye);
-    Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push}");
+    Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push} | Chips: {activePlaye.Chips}");
     }
 
     // Fråga om spelaren vill spela igen.

@@ -165,6 +165,23 @@ foreach (Player activePlaye in game.CurrentPlayers)
     Outcomes result = currentRound.EvaluateOutcome(activePlaye);
     Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push} | Chips: {activePlaye.Chips}");
     }
+    
+    //tar bort en spelare i taget när de inte har marker kvar
+    for (int i = game.CurrentPlayers.Count - 1; i >=0; i--)
+    {
+        //kolar om spelaren har slut på marker och tar bort spelaren
+        if (game.CurrentPlayers[i].Chips <= 0)
+        {
+            Console.WriteLine($"\n Player {game.CurrentPlayers[i].Name}, ran out of chips & is too poor to play");
+            game.CurrentPlayers.RemoveAt(i);
+        }
+    }
+    //avsular spelet om alla spelare vid bordet har slut på marker
+    if(game.CurrentPlayers.Count == 0)
+    {
+        Console.WriteLine("\n All players are too poor to continue...");
+        break; 
+    }
 
     // Fråga om spelaren vill spela igen.
     Console.Write("\nDo you want to play again? (yes/no): ");

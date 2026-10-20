@@ -31,18 +31,24 @@ class RuleSet
 
             if (parts.Length==2)
             {
+                // Trim() tar bort extra space om det finns.
+                // Gör parts[0] till key och parts[1] till value.
                 string key= parts[0].Trim();
                 string value=parts[1].Trim();
 
+            
                 if (key=="DealerStandsOnSoft17")
                 {
+                    // Returnerar bool t.ex "true"string till true-bool.
                     if (bool.TryParse(value,out bool result))
                     {
                     rules.DealerStandsOnSoft17= result;
                     }
                 }
+                
                 else if (key=="DeckCount")
-                {
+                {   
+                    // Returnerar int t.ex "1" String till 1 int.
                     if (int.TryParse(value,out int result))
                     {
                     rules.DeckCount= result;

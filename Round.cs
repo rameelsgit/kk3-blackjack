@@ -1,3 +1,4 @@
+using System.Data;
 using Blackjack.enums;
 namespace Blackjack.models;
 class Round
@@ -9,12 +10,16 @@ class Round
     private Dealer RoundDealer;
 
     private Outcomes RoundOutcome;
-public Round(Deck deck, List<Player> players, Dealer dealer)
+
+    private RuleSet Rules;
+
+public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
 //skapade en Konstruktör som hämtar information som sparas inför rundans början.
     {
         RoundDeck = deck;
         RoundPlayers = players;
         RoundDealer = dealer;
+        Rules=rules;
     }
 
 // när rundan startar får varje spelare två kort
@@ -57,7 +62,7 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
     // Dealers val att göra hit om totalscore är under 17.
     public void DealerTurn()
     {
-        while(!RoundDealer.NotHit())
+        while(!RoundDealer.NotHit(Rules))
         {
             RoundDealer.ReceiveCard(RoundDeck.DrawCard());
         }
@@ -75,13 +80,18 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
         return Outcomes.PlayerBust;
     }
  
-    
     if (dealerScore > 21)
     {
         player.AddWin();
         return Outcomes.DealerBust;
     }
- 
+
+    // kollar om det är en Natural Blackjack alltså Blackjack med (2 kort).
+    if (Rules.NaturalBlackjack&& player.Hand.Blackjack()&& dealerScore==21 && !RoundDealer.Hand.Blackjack())
+        {
+            player.AddWin();
+            return Outcomes.PlayerBlackjack;
+        }
     
     if (playerScore > dealerScore)
     {

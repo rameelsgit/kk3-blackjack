@@ -49,7 +49,7 @@ class Game
         }
 
         // Skapar en ny runda med de aktiva objekten
-        Round currentRound = new Round(_deck, _players, _dealer);
+        Round currentRound = new Round(_deck, _players, _dealer, Rules);
 
         // Dela ut de två första korten till varje deltagare
         currentRound.DealCards();

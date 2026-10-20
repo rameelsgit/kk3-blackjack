@@ -8,10 +8,22 @@ class Dealer : Participant
         
     }
 
-    // regel för dealer om dealer får mer än 17, 
-    public bool NotHit()
+    // regel för dealer om dealer får mer än 17.
+    public bool NotHit(RuleSet rules)
     {
-        return Hand.CalculateScore()>= 17;
+        int score=Hand.CalculateScore();
+
+        if (score>17)
+        {
+            return true;
+        }
+        if (score<17)
+        {
+            return false;
+        }
+
+        // Om score är exakt 17 då används den här regel.
+        return rules.DealerStandsOnSoft17;
 
     }
 

@@ -11,3 +11,5 @@ public class RiskyStrategy : IPlayerStrategy
         return hand.CalculateScore() < 19 ? Moves.Hit : Moves.Stand;
     }
 }
+
+// Risky

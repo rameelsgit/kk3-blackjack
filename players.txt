@@ -1,4 +1,6 @@
 Talha,2,1,0
-Rosh,1,1,0
+Rosh,1,4,0
 rr,1,0,0
 roshh,1,1,0
+Rosh2,0,2,0
+Bot Grundstrategi,0,1,0

@@ -5,6 +5,7 @@ using Blackjack.Graphics;
 //Ladda alla spelare från filen.
 GameStorage storage = new GameStorage();
 List<Player> players = storage.LoadPlayers();
+RuleSet rules= RuleSet.LoadFromFile("rules.txt");
 
 Console.WriteLine("= WELCOME TO BLACKJACK =");
 
@@ -55,13 +56,20 @@ Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Loss
 }
 
 // Starta spelmotorn.
-Game game = new Game(activePlayers);
+// Här för objektet game tillgång till rules också. 
+Game game = new Game(activePlayers, rules);
 bool keepPlaying = true;
 
 while (keepPlaying)
 {
     Console.WriteLine("\n");
     Console.WriteLine("Starting a new round...");
+    Console.WriteLine("\n=== ACTIVE GAME RULES ===");
+    Console.WriteLine($"• Number of Decks: {rules.DeckCount}");
+    Console.WriteLine($"• Reshuffle when: {rules.Reshuffle} cards remaining");
+    Console.WriteLine($"• Dealer Stands on Soft 17: {rules.DealerStandsOnSoft17}");
+    Console.WriteLine($"• Natural Blackjack beats 3-card 21: {rules.NaturalBlackjack}");
+    Console.WriteLine("n");
 
     Round currentRound = game.StartNewRound();
 

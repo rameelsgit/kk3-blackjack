@@ -13,7 +13,7 @@ public class GameStorage
         //foreach loopen sparar spelarens data som namn, vinst osv
         foreach (Player splayer in players)
         {
-            lines.Add($"{splayer.Name},{splayer.Win},{splayer.Loss},{splayer.Push}");
+            lines.Add($"{splayer.Name},{splayer.Win},{splayer.Loss},{splayer.Push},{splayer.Chips}");
         }
         //sparar i player.txt
         File.WriteAllLines(FilePath, lines);
@@ -39,18 +39,20 @@ public class GameStorage
             //delar upp array vid "," till individuella strings
             string[] parts = line.Split(',');
 
-            //ser till att det finns fyra fält av namn,vinst,förlust och lika
-            if (parts.Length == 4)
+            //ser till att det finns fem fält av namn,vinst,förlust,lika och chips
+            if (parts.Length == 5)
             {
                 string name = parts[0];
                 //if-sats av int.tryParse för att hörhindra krasch
                 if (int.TryParse(parts[1], out int win) &&
                     int.TryParse(parts[2], out int loss) &&
-                    int.TryParse(parts[3], out int push))
+                    int.TryParse(parts[3], out int push) &&
+                    int.TryParse(parts[4], out int chips))
                     {
-                        //skapar ny spelare, hämtar stats och sparar om if sats är sann
+                        //skapar ny spelare, hämtar stats, chips och sparar om if sats är sann
                         Player player = new Player(name);
                         player.SetStats(win, loss, push);
+                        player.setChips(chips);
                         loadedPlayers.Add(player);
                     }
 

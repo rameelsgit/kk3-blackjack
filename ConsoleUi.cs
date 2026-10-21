@@ -55,6 +55,67 @@ activePlayers.Add(activePlayer);
 Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push} | Chips: {activePlayer.Chips}");
 }
 
+// Alla sex strategier som kan väljas.
+IPlayerStrategy[] strategies =
+{
+    new HitUnder17Strategy(),
+    new CautiousStrategy(),
+    new RiskyStrategy(),
+    //new RandomStrategy(),
+    new DealerAwareStrategy(),
+    new BasicStrategy()
+};
+
+// Totalt max 5 spelare vid bordet, människor och datorer tillsammans.
+
+int maxComputers = 5 - activePlayers.Count;
+int computerCount = -1;
+while (maxComputers > 0 && (computerCount < 0 || computerCount > maxComputers))
+{
+    Console.Write($"How many computer players? (0-{maxComputers}): ");
+    int.TryParse(Console.ReadLine(), out computerCount);
+}
+if (computerCount < 0) computerCount = 0;
+
+for (int i = 1; i <= computerCount; i++)
+{
+    Console.WriteLine($"\nChoose strategy for computer {i}:");
+    for (int s = 0; s < strategies.Length; s++)
+    {
+        Console.WriteLine($"  ({s + 1}) {strategies[s].Name}");
+    }
+
+    int choice = 0;
+    while (choice < 1 || choice > strategies.Length)
+    {
+        Console.Write("Strategy: ");
+        int.TryParse(Console.ReadLine(), out choice);
+    }
+    IPlayerStrategy strategy = strategies[choice - 1];
+
+    // Unikt namn, så att två datorer med samma strategi inte krockar.
+
+    string botName = $"Bot {strategy.Name}";
+    if (activePlayers.Any(p => p.Name.ToLower() == botName.ToLower()))
+    {
+        botName = $"{botName} {i}";
+    }
+
+    ComputerPlayer bot = new ComputerPlayer(botName, strategy);
+
+    // Hämta sparad statistik om datorn har spelat förut, och ersätt den i listan.
+
+    Player? saved = players.FirstOrDefault(p => p.Name.ToLower() == botName.ToLower());
+    if (saved != null)
+    {
+        bot.SetStats(saved.Win, saved.Loss, saved.Push);
+        players.Remove(saved);
+    }
+    players.Add(bot);       // så att den sparas i players.txt
+    activePlayers.Add(bot); // så att den sitter vid bordet
+}
+
+
 // Starta spelmotorn.
 // Här för objektet game tillgång till rules också. 
 Game game = new Game(activePlayers, rules);
@@ -112,6 +173,29 @@ foreach (Player p in game.CurrentPlayers)
     foreach (Player activePlaye in game.CurrentPlayers)
     {
     Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
+
+    if (activePlaye is ComputerPlayer bot)
+{
+    Card dealerUpCard = game.CurrentDealer.Hand.Cards[0];
+
+    while (!bot.Hand.IsBust())
+    {
+        Moves move = bot.ChooseMove(dealerUpCard); // samma anrop, olika strategi
+        Console.WriteLine($"{bot.Name} chooses {move}");
+        currentRound.PlayerTurn(move, bot);
+
+        if (move == Moves.Stand) break;
+
+        Console.WriteLine($"Cards: {string.Join(", ", bot.Hand.Cards)} (Score: {bot.Hand.CalculateScore()})");
+    }
+
+    if (bot.Hand.IsBust())
+    {
+        Console.WriteLine($"{bot.Name} is Bust! Score went over 21.");
+    }
+    continue; // hoppa över den mänskliga inmatningen
+}
+
     bool isTurnActive = true;
 
     while (isTurnActive)

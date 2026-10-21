@@ -1,5 +1,6 @@
 ﻿using Blackjack.enums;
 using Blackjack.models;
+using Blackjack.Graphics;
 
 //Ladda alla spelare från filen.
 GameStorage storage = new GameStorage();
@@ -51,7 +52,7 @@ if (activePlayer == null)
 
 activePlayers.Add(activePlayer);
 
-Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push}");
+Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push} | Chips: {activePlayer.Chips}");
 }
 
 // Starta spelmotorn.
@@ -72,16 +73,44 @@ while (keepPlaying)
 
     Round currentRound = game.StartNewRound();
 
-    // Visa startpoäng.
-    Console.WriteLine($"Dealer Score: {game.CurrentDealer.Hand.CalculateScore()}");
-    foreach (Player p in game.CurrentPlayers)
+    // placera insats fören kort delas ut 
+    Console.WriteLine("=PLACE YOUR BETS=");
+    // loopen för varje spelare att sätta in giltig amount av chips
+    foreach( Player p in game.CurrentPlayers)
     {
-    Console.WriteLine($"{p.Name} Score: {p.Hand.CalculateScore()}");
+        int bet = 0;
+    // om bet inte är större än 0 eller under chips amount, körs loopen om 
+        while (bet < 1 || bet > p.Chips)
+        {
+            Console.Write($"{p.Name} (Chips: {p.Chips}) - Enter your bet: ");
+            // om input inte är ett nummer + samma krav som while-loop, körs loopen om 
+            if(!int.TryParse(Console.ReadLine(), out bet) || bet <1 || bet> p.Chips)
+            {
+                Console.WriteLine("Enter available amount");
+            }
+            
+        }
+        //om bets är giltiga plceras dem och går vidare
+        currentRound.PlaceBets(p, bet);
     }
 
-    // Loop för spelarens tur.
-foreach (Player activePlaye in game.CurrentPlayers)
+    // Visa startpoäng.
+    Console.WriteLine($"\nDealer Cards: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
+    foreach (Player p in game.CurrentPlayers)
+    {
+    Console.WriteLine($"{p.Name} Cards: {string.Join(", ", p.Hand.Cards)} (Score: {p.Hand.CalculateScore()})");
+    }
+
+    //Rita ut kort vid start och dölja dealerns första kort.
+PrintHand("Dealer", game.CurrentDealer.Hand, true);
+foreach (Player p in game.CurrentPlayers)
 {
+    PrintHand(p.Name, p.Hand, false);
+}
+
+    // Loop för spelarnas turer 
+    foreach (Player activePlaye in game.CurrentPlayers)
+    {
     Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
     bool isTurnActive = true;
 
@@ -100,7 +129,10 @@ foreach (Player activePlaye in game.CurrentPlayers)
         if (input == "1" || input == "hit")
         {
             currentRound.PlayerTurn(Moves.Hit, activePlaye);
-            Console.WriteLine($"New Score: {activePlaye.Hand.CalculateScore()}");
+            Console.WriteLine($"Cards: {string.Join(", ", activePlaye.Hand.Cards)} (Score: {activePlaye.Hand.CalculateScore()})");
+
+            //Ritar ut spelarens uppdaterade hand efter att ha tagit ett nytt kort
+    PrintHand(activePlaye.Name, activePlaye.Hand, false);
 
             if (activePlaye.Hand.IsBust())
             {
@@ -118,7 +150,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
             Console.WriteLine("Invalid input! Please enter 1 or 2.");
         }
     }
-}
+    }
 
 // Dealerns tur körs endast om spelaren inte blev Bust.
   bool anyPlayerSurvives = false;
@@ -137,7 +169,10 @@ foreach (Player activePlaye in game.CurrentPlayers)
     {
     Console.WriteLine("\nDealer turn...");
     currentRound.DealerTurn();
-    Console.WriteLine($"Dealer Final Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    Console.WriteLine($"Dealer Final Score: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
+   
+    PrintHand("Dealer Final", game.CurrentDealer.Hand, false); // Visar dealerns alla kort!
+
     }
     else
     {
@@ -149,7 +184,24 @@ foreach (Player activePlaye in game.CurrentPlayers)
     foreach (Player activePlaye in game.CurrentPlayers)
     {
     Outcomes result = currentRound.EvaluateOutcome(activePlaye);
-    Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push}");
+    Console.WriteLine($"{activePlaye.Name}: {result} | Updated Stats -> Wins: {activePlaye.Win} | Losses: {activePlaye.Loss} | Pushes: {activePlaye.Push} | Chips: {activePlaye.Chips}");
+    }
+    
+    //tar bort en spelare i taget när de inte har marker kvar
+    for (int i = game.CurrentPlayers.Count - 1; i >=0; i--)
+    {
+        //kolar om spelaren har slut på marker och tar bort spelaren
+        if (game.CurrentPlayers[i].Chips <= 0)
+        {
+            Console.WriteLine($"\n Player {game.CurrentPlayers[i].Name}, ran out of chips & is too poor to play");
+            game.CurrentPlayers.RemoveAt(i);
+        }
+    }
+    //avsular spelet om alla spelare vid bordet har slut på marker
+    if(game.CurrentPlayers.Count == 0)
+    {
+        Console.WriteLine("\n All players are too poor to continue...");
+        break; 
     }
 
     // Fråga om spelaren vill spela igen.
@@ -165,3 +217,46 @@ foreach (Player activePlaye in game.CurrentPlayers)
 // Spara alla spelare till filen vid avslut.
 storage.SavePlayers(players);
 Console.WriteLine("Resultat sparat.");
+
+// metod som hjälper att rita ut en spelares hand grafiskt med rätt färg
+void PrintHand(string ownerName, Hand hand, bool hideFirstCard = false)
+{
+    Graphics renderer = new Graphics();
+
+    Console.WriteLine($"\n=== {ownerName}s Hand ===");
+
+    //Loopar genom kortens 6 rader
+    for (int lineIndex = 0; lineIndex < 6; lineIndex++)
+    {
+        //Går genom alla kort från vänster till höger
+        for (int cardIndex = 0; cardIndex < hand.Cards.Count; cardIndex++)
+        {
+            Card currentCard = hand.Cards[cardIndex];
+            bool isHidden = hideFirstCard && cardIndex == 0;
+            string[] cardLines = renderer.GetCardLines(currentCard, isHidden);
+
+            // Röd färg för Hjärter och Ruter
+            if (!isHidden && (currentCard.Suit == Suit.Hearts || currentCard.Suit == Suit.Diamonds))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.Write(cardLines[lineIndex] + " ");
+            Console.ResetColor();
+        }
+        Console.WriteLine();
+    }
+    // Visar poängen under korten
+    if (hideFirstCard)
+    {
+        Console.WriteLine("Poäng: ? (Dolt kort)");
+    }
+    else
+    {
+        Console.WriteLine($"Poäng: {hand.CalculateScore()}");
+    }
+}

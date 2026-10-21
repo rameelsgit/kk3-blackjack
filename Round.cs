@@ -22,6 +22,30 @@ public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
         Rules=rules;
     }
 
+    //metoden placerar ut satsningarna fören korten delas ut
+    public void PlaceBets(Player player, int betAmounts)
+    {
+        //tar bort marker från spelarens betAmounts
+        player.RemoveChips(betAmounts);
+        // lägger spelarens betAmounts i dictionary, för att komma ihåg allas amounts
+        PlayerBets[player]= betAmounts;
+    }
+
+    //metoden hämtar spelarens satsning för rundan 
+    public int GetBet(Player player)
+    {
+        //kollar om spelaren har lagt en satsning i dictionary 
+        if(PlayerBets.ContainsKey(player))
+        {
+            return PlayerBets[player];
+        }
+        //returnerar 0 om inget hittas
+        else
+        {
+            return 0;
+        }
+    }
+
 // när rundan startar får varje spelare två kort
     public void DealCards()
     {
@@ -72,8 +96,20 @@ public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
 {
     int playerScore = player.Hand.CalculateScore();
     int dealerScore = RoundDealer.Hand.CalculateScore();
- 
-  
+    //använder getbet för att hantera satsningarna i evaluateoutcome
+    int bet = GetBet(player);
+
+    // if-sats för naturlig 21
+    if (player.Hand.Blackjack() && !RoundDealer.Hand.Blackjack())
+     {
+        // splearens payout blir satsningaen tillbaka och * 1.5
+        player.AddWin();
+        int payout = bet + (int)(bet * 1.5);
+        player.AddChips(payout);
+        return Outcomes.PlayerBlackjack;
+    }
+
+
     if (playerScore > 21)
     {
         player.AddLoss();
@@ -82,6 +118,9 @@ public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
  
     if (dealerScore > 21)
     {
+        // lagt till 1:1 vinst
+        int payout = bet * 2;
+        player.AddChips(payout);
         player.AddWin();
         return Outcomes.DealerBust;
     }
@@ -95,6 +134,9 @@ public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
     
     if (playerScore > dealerScore)
     {
+        // lagt till 1:1 vinst
+        int payout = bet * 2;
+        player.AddChips(payout);
         player.AddWin();
         return Outcomes.PlayerWins;
     }
@@ -103,8 +145,9 @@ public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
         player.AddLoss();
         return Outcomes.DealerWins;
     }
- 
-    
+
+    // splearen får tillbaka sin insats
+    player.AddChips(bet);
     player.AddPush();
     return Outcomes.Push;
 }

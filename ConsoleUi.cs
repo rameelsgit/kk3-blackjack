@@ -1,5 +1,6 @@
 ﻿using Blackjack.enums;
 using Blackjack.models;
+using Blackjack.Graphics;
 
 //Ladda alla spelare från filen.
 GameStorage storage = new GameStorage();
@@ -71,7 +72,14 @@ while (keepPlaying)
     Console.WriteLine($"{p.Name} Cards: {string.Join(", ", p.Hand.Cards)} (Score: {p.Hand.CalculateScore()})");
     }
 
-    // Loop för spelarens tur.
+    //Rita ut kort vid start och dölja dealerns första kort.
+PrintHand("Dealer", game.CurrentDealer.Hand, true);
+foreach (Player p in game.CurrentPlayers)
+{
+    PrintHand(p.Name, p.Hand, false);
+}
+
+    // Loop för spelarnas turer 
     foreach (Player activePlaye in game.CurrentPlayers)
     {
     Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
@@ -93,6 +101,9 @@ while (keepPlaying)
         {
             currentRound.PlayerTurn(Moves.Hit, activePlaye);
             Console.WriteLine($"Cards: {string.Join(", ", activePlaye.Hand.Cards)} (Score: {activePlaye.Hand.CalculateScore()})");
+
+            //Ritar ut spelarens uppdaterade hand efter att ha tagit ett nytt kort
+    PrintHand(activePlaye.Name, activePlaye.Hand, false);
 
             if (activePlaye.Hand.IsBust())
             {
@@ -130,6 +141,9 @@ while (keepPlaying)
     Console.WriteLine("\nDealer turn...");
     currentRound.DealerTurn();
     Console.WriteLine($"Dealer Final Score: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
+   
+    PrintHand("Dealer Final", game.CurrentDealer.Hand, false); // Visar dealerns alla kort!
+
     }
     else
     {
@@ -157,3 +171,46 @@ while (keepPlaying)
 // Spara alla spelare till filen vid avslut.
 storage.SavePlayers(players);
 Console.WriteLine("Resultat sparat.");
+
+// metod som hjälper att rita ut en spelares hand grafiskt med rätt färg
+void PrintHand(string ownerName, Hand hand, bool hideFirstCard = false)
+{
+    Graphics renderer = new Graphics();
+
+    Console.WriteLine($"\n=== {ownerName}s Hand ===");
+
+    //Loopar genom kortens 6 rader
+    for (int lineIndex = 0; lineIndex < 6; lineIndex++)
+    {
+        //Går genom alla kort från vänster till höger
+        for (int cardIndex = 0; cardIndex < hand.Cards.Count; cardIndex++)
+        {
+            Card currentCard = hand.Cards[cardIndex];
+            bool isHidden = hideFirstCard && cardIndex == 0;
+            string[] cardLines = renderer.GetCardLines(currentCard, isHidden);
+
+            // Röd färg för Hjärter och Ruter
+            if (!isHidden && (currentCard.Suit == Suit.Hearts || currentCard.Suit == Suit.Diamonds))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.Write(cardLines[lineIndex] + " ");
+            Console.ResetColor();
+        }
+        Console.WriteLine();
+    }
+    // Visar poängen under korten
+    if (hideFirstCard)
+    {
+        Console.WriteLine("Poäng: ? (Dolt kort)");
+    }
+    else
+    {
+        Console.WriteLine($"Poäng: {hand.CalculateScore()}");
+    }
+}

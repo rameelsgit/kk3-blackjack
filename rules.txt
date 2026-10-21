@@ -1,4 +1,4 @@
 DealerStandsOnSoft17=true
-DeckCount=1
-Reshuffle=15
+DeckCount=2
+Reshuffle=10
 NaturalBlackjack=true

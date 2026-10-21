@@ -63,6 +63,12 @@ while (keepPlaying)
 {
     Console.WriteLine("\n");
     Console.WriteLine("Starting a new round...");
+    Console.WriteLine("\n=== ACTIVE GAME RULES ===");
+    Console.WriteLine($"• Number of Decks: {rules.DeckCount}");
+    Console.WriteLine($"• Reshuffle when: {rules.Reshuffle} cards remaining");
+    Console.WriteLine($"• Dealer Stands on Soft 17: {rules.DealerStandsOnSoft17}");
+    Console.WriteLine($"• Natural Blackjack beats 3-card 21: {rules.NaturalBlackjack}");
+    Console.WriteLine("n");
 
     Round currentRound = game.StartNewRound();
 

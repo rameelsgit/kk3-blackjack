@@ -23,7 +23,14 @@ class Dealer : Participant
         }
 
         // Om score är exakt 17 då används den här regel.
-        return rules.DealerStandsOnSoft17;
+        bool hasAce = Hand.ToString()!.Contains("Ace");
+
+        if(hasAce)
+        {
+            return rules.DealerStandsOnSoft17;
+
+        }
+        return true;
 
     }
 

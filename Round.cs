@@ -13,6 +13,10 @@ class Round
 
     private RuleSet Rules;
 
+    private Dictionary<Player, int> PlayerBets= new Dictionary<Player, int>(); 
+
+
+
 public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
 //skapade en Konstruktör som hämtar information som sparas inför rundans början.
     {

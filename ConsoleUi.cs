@@ -56,12 +56,12 @@ Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Loss
 // Alla sex strategier som kan väljas.
 IPlayerStrategy[] strategies =
 {
-    //new HitUnder17Strategy(),
-    //new CautiousStrategy(),
-    //new RiskyStrategy(),
+    new HitUnder17Strategy(),
+    new CautiousStrategy(),
+    new RiskyStrategy(),
     //new RandomStrategy(),
-    //new DealerAwareStrategy(),
-    //new BasicStrategy()
+    new DealerAwareStrategy(),
+    new BasicStrategy()
 };
 
 // Totalt max 5 spelare vid bordet, människor och datorer tillsammans.
@@ -112,6 +112,7 @@ for (int i = 1; i <= computerCount; i++)
     players.Add(bot);       // så att den sparas i players.txt
     activePlayers.Add(bot); // så att den sitter vid bordet
 }
+
 
 // Starta spelmotorn.
 Game game = new Game(activePlayers);

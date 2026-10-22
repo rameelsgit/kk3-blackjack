@@ -1,9 +1,11 @@
 ﻿using Blackjack.enums;
 using Blackjack.models;
+using Blackjack.Graphics;
 
 //Ladda alla spelare från filen.
 GameStorage storage = new GameStorage();
 List<Player> players = storage.LoadPlayers();
+RuleSet rules= RuleSet.LoadFromFile("rules.txt");
 
 Console.WriteLine("= WELCOME TO BLACKJACK =");
 
@@ -42,7 +44,6 @@ foreach (Player p in players)
 }
 
 // Skapa ny spelare om den inte hittades.
-// Skapa ny spelare om den inte hittades.
 if (activePlayer == null)
 {
     activePlayer = new Player(playerName);
@@ -54,14 +55,82 @@ activePlayers.Add(activePlayer);
 Console.WriteLine($"Welcome {activePlayer.Name}! Wins: {activePlayer.Win} | Losses: {activePlayer.Loss} | Pushes: {activePlayer.Push} | Chips: {activePlayer.Chips}");
 }
 
+// Alla sex strategier som kan väljas.
+IPlayerStrategy[] strategies =
+{
+    new HitUnder17Strategy(),
+    new CautiousStrategy(),
+    new RiskyStrategy(),
+    //new RandomStrategy(),
+    new DealerAwareStrategy(),
+    new BasicStrategy()
+};
+
+// Totalt max 5 spelare vid bordet, människor och datorer tillsammans.
+
+int maxComputers = 5 - activePlayers.Count;
+int computerCount = -1;
+while (maxComputers > 0 && (computerCount < 0 || computerCount > maxComputers))
+{
+    Console.Write($"How many computer players? (0-{maxComputers}): ");
+    int.TryParse(Console.ReadLine(), out computerCount);
+}
+if (computerCount < 0) computerCount = 0;
+
+for (int i = 1; i <= computerCount; i++)
+{
+    Console.WriteLine($"\nChoose strategy for computer {i}:");
+    for (int s = 0; s < strategies.Length; s++)
+    {
+        Console.WriteLine($"  ({s + 1}) {strategies[s].Name}");
+    }
+
+    int choice = 0;
+    while (choice < 1 || choice > strategies.Length)
+    {
+        Console.Write("Strategy: ");
+        int.TryParse(Console.ReadLine(), out choice);
+    }
+    IPlayerStrategy strategy = strategies[choice - 1];
+
+    // Unikt namn, så att två datorer med samma strategi inte krockar.
+
+    string botName = $"Bot {strategy.Name}";
+    if (activePlayers.Any(p => p.Name.ToLower() == botName.ToLower()))
+    {
+        botName = $"{botName} {i}";
+    }
+
+    ComputerPlayer bot = new ComputerPlayer(botName, strategy);
+
+    // Hämta sparad statistik om datorn har spelat förut, och ersätt den i listan.
+
+    Player? saved = players.FirstOrDefault(p => p.Name.ToLower() == botName.ToLower());
+    if (saved != null)
+    {
+        bot.SetStats(saved.Win, saved.Loss, saved.Push);
+        players.Remove(saved);
+    }
+    players.Add(bot);       // så att den sparas i players.txt
+    activePlayers.Add(bot); // så att den sitter vid bordet
+}
+
+
 // Starta spelmotorn.
-Game game = new Game(activePlayers);
+// Här för objektet game tillgång till rules också. 
+Game game = new Game(activePlayers, rules);
 bool keepPlaying = true;
 
 while (keepPlaying)
 {
     Console.WriteLine("\n");
     Console.WriteLine("Starting a new round...");
+    Console.WriteLine("\n=== ACTIVE GAME RULES ===");
+    Console.WriteLine($"• Number of Decks: {rules.DeckCount}");
+    Console.WriteLine($"• Reshuffle when: {rules.Reshuffle} cards remaining");
+    Console.WriteLine($"• Dealer Stands on Soft 17: {rules.DealerStandsOnSoft17}");
+    Console.WriteLine($"• Natural Blackjack beats 3-card 21: {rules.NaturalBlackjack}");
+    Console.WriteLine("n");
 
     Round currentRound = game.StartNewRound();
 
@@ -87,16 +156,46 @@ while (keepPlaying)
     }
 
     // Visa startpoäng.
-    Console.WriteLine($"Dealer Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    Console.WriteLine($"\nDealer Cards: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
     foreach (Player p in game.CurrentPlayers)
     {
-    Console.WriteLine($"{p.Name} Score: {p.Hand.CalculateScore()}");
+    Console.WriteLine($"{p.Name} Cards: {string.Join(", ", p.Hand.Cards)} (Score: {p.Hand.CalculateScore()})");
     }
 
-    // Loop för spelarens tur.
-foreach (Player activePlaye in game.CurrentPlayers)
+    //Rita ut kort vid start och dölja dealerns första kort.
+PrintHand("Dealer", game.CurrentDealer.Hand, true);
+foreach (Player p in game.CurrentPlayers)
 {
+    PrintHand(p.Name, p.Hand, false);
+}
+
+    // Loop för spelarnas turer 
+    foreach (Player activePlaye in game.CurrentPlayers)
+    {
     Console.WriteLine($"\n--- {activePlaye.Name}'s Turn ---");
+
+    if (activePlaye is ComputerPlayer bot)
+{
+    Card dealerUpCard = game.CurrentDealer.Hand.Cards[0];
+
+    while (!bot.Hand.IsBust())
+    {
+        Moves move = bot.ChooseMove(dealerUpCard); // samma anrop, olika strategi
+        Console.WriteLine($"{bot.Name} chooses {move}");
+        currentRound.PlayerTurn(move, bot);
+
+        if (move == Moves.Stand) break;
+
+        Console.WriteLine($"Cards: {string.Join(", ", bot.Hand.Cards)} (Score: {bot.Hand.CalculateScore()})");
+    }
+
+    if (bot.Hand.IsBust())
+    {
+        Console.WriteLine($"{bot.Name} is Bust! Score went over 21.");
+    }
+    continue; // hoppa över den mänskliga inmatningen
+}
+
     bool isTurnActive = true;
 
     while (isTurnActive)
@@ -114,7 +213,10 @@ foreach (Player activePlaye in game.CurrentPlayers)
         if (input == "1" || input == "hit")
         {
             currentRound.PlayerTurn(Moves.Hit, activePlaye);
-            Console.WriteLine($"New Score: {activePlaye.Hand.CalculateScore()}");
+            Console.WriteLine($"Cards: {string.Join(", ", activePlaye.Hand.Cards)} (Score: {activePlaye.Hand.CalculateScore()})");
+
+            //Ritar ut spelarens uppdaterade hand efter att ha tagit ett nytt kort
+    PrintHand(activePlaye.Name, activePlaye.Hand, false);
 
             if (activePlaye.Hand.IsBust())
             {
@@ -132,7 +234,7 @@ foreach (Player activePlaye in game.CurrentPlayers)
             Console.WriteLine("Invalid input! Please enter 1 or 2.");
         }
     }
-}
+    }
 
 // Dealerns tur körs endast om spelaren inte blev Bust.
   bool anyPlayerSurvives = false;
@@ -151,7 +253,10 @@ foreach (Player activePlaye in game.CurrentPlayers)
     {
     Console.WriteLine("\nDealer turn...");
     currentRound.DealerTurn();
-    Console.WriteLine($"Dealer Final Score: {game.CurrentDealer.Hand.CalculateScore()}");
+    Console.WriteLine($"Dealer Final Score: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
+   
+    PrintHand("Dealer Final", game.CurrentDealer.Hand, false); // Visar dealerns alla kort!
+
     }
     else
     {
@@ -196,3 +301,46 @@ foreach (Player activePlaye in game.CurrentPlayers)
 // Spara alla spelare till filen vid avslut.
 storage.SavePlayers(players);
 Console.WriteLine("Resultat sparat.");
+
+// metod som hjälper att rita ut en spelares hand grafiskt med rätt färg
+void PrintHand(string ownerName, Hand hand, bool hideFirstCard = false)
+{
+    Graphics renderer = new Graphics();
+
+    Console.WriteLine($"\n=== {ownerName}s Hand ===");
+
+    //Loopar genom kortens 6 rader
+    for (int lineIndex = 0; lineIndex < 6; lineIndex++)
+    {
+        //Går genom alla kort från vänster till höger
+        for (int cardIndex = 0; cardIndex < hand.Cards.Count; cardIndex++)
+        {
+            Card currentCard = hand.Cards[cardIndex];
+            bool isHidden = hideFirstCard && cardIndex == 0;
+            string[] cardLines = renderer.GetCardLines(currentCard, isHidden);
+
+            // Röd färg för Hjärter och Ruter
+            if (!isHidden && (currentCard.Suit == Suit.Hearts || currentCard.Suit == Suit.Diamonds))
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+
+            Console.Write(cardLines[lineIndex] + " ");
+            Console.ResetColor();
+        }
+        Console.WriteLine();
+    }
+    // Visar poängen under korten
+    if (hideFirstCard)
+    {
+        Console.WriteLine("Poäng: ? (Dolt kort)");
+    }
+    else
+    {
+        Console.WriteLine($"Poäng: {hand.CalculateScore()}");
+    }
+}

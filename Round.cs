@@ -1,3 +1,4 @@
+using System.Data;
 using Blackjack.enums;
 namespace Blackjack.models;
 class Round
@@ -13,11 +14,15 @@ class Round
     //dictionary håller koll på varje player objekts satsning separat , 
     private Dictionary<Player, int> PlayerBets= new Dictionary<Player, int>();
 public Round(Deck deck, List<Player> players, Dealer dealer)
+    private RuleSet Rules;
+
+public Round(Deck deck, List<Player> players, Dealer dealer, RuleSet rules)
 //skapade en Konstruktör som hämtar information som sparas inför rundans början.
     {
         RoundDeck = deck;
         RoundPlayers = players;
         RoundDealer = dealer;
+        Rules=rules;
     }
 
     //metoden placerar ut satsningarna fören korten delas ut
@@ -84,7 +89,7 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
     // Dealers val att göra hit om totalscore är under 17.
     public void DealerTurn()
     {
-        while(!RoundDealer.NotHit())
+        while(!RoundDealer.NotHit(Rules))
         {
             RoundDealer.ReceiveCard(RoundDeck.DrawCard());
         }
@@ -114,7 +119,6 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
         return Outcomes.PlayerBust;
     }
  
-    
     if (dealerScore > 21)
     {
         // lagt till 1:1 vinst
@@ -123,7 +127,13 @@ public Round(Deck deck, List<Player> players, Dealer dealer)
         player.AddWin();
         return Outcomes.DealerBust;
     }
- 
+
+    // kollar om det är en Natural Blackjack alltså Blackjack med (2 kort).
+    if (Rules.NaturalBlackjack&& player.Hand.Blackjack()&& dealerScore==21 && !RoundDealer.Hand.Blackjack())
+        {
+            player.AddWin();
+            return Outcomes.PlayerBlackjack;
+        }
     
     if (playerScore > dealerScore)
     {

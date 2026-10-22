@@ -156,7 +156,7 @@ while (keepPlaying)
     }
 
     // Visa startpoäng.
-    Console.WriteLine($"\nDealer Cards: {string.Join(", ", game.CurrentDealer.Hand.Cards)} (Score: {game.CurrentDealer.Hand.CalculateScore()})");
+    Console.WriteLine("");
     foreach (Player p in game.CurrentPlayers)
     {
     Console.WriteLine($"{p.Name} Cards: {string.Join(", ", p.Hand.Cards)} (Score: {p.Hand.CalculateScore()})");

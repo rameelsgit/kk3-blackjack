@@ -11,6 +11,9 @@ class Round
 
     private Outcomes RoundOutcome;
 
+    //dictionary håller koll på varje player objekts satsning separat , 
+    private Dictionary<Player, int> PlayerBets= new Dictionary<Player, int>();
+public Round(Deck deck, List<Player> players, Dealer dealer)
     private RuleSet Rules;
     
     //dictionary håller koll på varje player objekts satsning separat 

@@ -1,4 +1,5 @@
-﻿using Blackjack.enums;
+﻿using System.Globalization;
+using Blackjack.enums;
 using Blackjack.models;
 using Blackjack.Graphics;
 
@@ -69,13 +70,21 @@ IPlayerStrategy[] strategies =
 // Totalt max 5 spelare vid bordet, människor och datorer tillsammans.
 
 int maxComputers = 5 - activePlayers.Count;
-int computerCount = -1;
-while (maxComputers > 0 && (computerCount < 0 || computerCount > maxComputers))
+int computerCount = 0;
+while (maxComputers > 0)
 {
     Console.Write($"How many computer players? (0-{maxComputers}): ");
-    int.TryParse(Console.ReadLine(), out computerCount);
+    string? input = Console.ReadLine()?.Trim();
+    if (int.TryParse(input, NumberStyles.None, CultureInfo.InvariantCulture, out int enteredCount) &&
+        enteredCount >= 0 &&
+        enteredCount <= maxComputers)
+    {
+        computerCount = enteredCount;
+        break;
+    }
+
+    Console.WriteLine($"Enter a whole number between 0 and {maxComputers}.");
 }
-if (computerCount < 0) computerCount = 0;
 
 for (int i = 1; i <= computerCount; i++)
 {

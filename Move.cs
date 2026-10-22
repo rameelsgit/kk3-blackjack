@@ -6,7 +6,3 @@ public enum Moves
     Hit,    // Ta ett kort
     Stand   // Stanna
 }
-class Move
-{
-    
-}

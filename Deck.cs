@@ -48,10 +48,11 @@ public class Deck
     // Blanda kortleken.
     public void Shuffle()
     {
-        for (int i=0; i<_cards.Count;i++)
+         //blandar nu med fisher yates, itirerar baklänges
+        for (int i=0; i<_cards.Count-1;i++)
         {
-            //Väljer ett slumpmässigt index
-            int randomIndex=_random.Next(_cards.Count);
+            //Väljer ett slumpmässigt index från index till slutet
+            int randomIndex=_random.Next(i,_cards.Count);
 
             //Byter plats på kortet vi är på och det slumpade kortet
             Card temp= _cards[i];
